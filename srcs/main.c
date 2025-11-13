@@ -6,13 +6,18 @@
 /*   By: thbouver <thbouver@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 17:46:18 by thbouver          #+#    #+#             */
-/*   Updated: 2025/11/11 17:46:51 by thbouver         ###   ########.fr       */
+/*   Updated: 2025/11/11 17:52:05 by thbouver         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-int	main(void)
+int	main(int argc, char *argv[])
 {
+	if (argc != 5)
+	{
+		ft_putstr_fd("usage > ./pipex file1 cmd1 | file 2 cmd2", STDERR_FILENO);
+		return (1);
+	}
 	return (0);
 }
