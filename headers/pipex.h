@@ -6,7 +6,7 @@
 /*   By: thbouver <thbouver@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 17:50:13 by thbouver          #+#    #+#             */
-/*   Updated: 2025/11/13 16:25:24 by thbouver         ###   ########.fr       */
+/*   Updated: 2025/11/14 13:35:54 by thbouver         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,5 +25,8 @@ typedef struct s_pipex
 	int	fd_file_in;
 	int	fd_file_out;
 }	t_pipex;
+
+char	*ft_strcat(char *dest, char *src);
+void	free_tab(char **tab);
 
 #endif

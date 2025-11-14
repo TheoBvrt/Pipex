@@ -6,7 +6,7 @@
 /*   By: thbouver <thbouver@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 17:46:18 by thbouver          #+#    #+#             */
-/*   Updated: 2025/11/13 17:59:48 by thbouver         ###   ########.fr       */
+/*   Updated: 2025/11/14 16:56:25 by thbouver         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,21 +15,33 @@
 char	*get_path(char *cmd, char *path)
 {
 	char	**tmp;
-	char	*new;
+	char	*cmd_path;
 	int		index;
 
 	index = 0;
+	cmd_path = NULL;
 	tmp = ft_split(path + 5, ':');
 	if (!tmp)
 		return (NULL);
 	while(tmp[index])
 	{
-		// new = ft_strjoin(tmp[index], )
+		cmd_path = ft_strcat(cmd_path, tmp[index]);
+		cmd_path = ft_strcat(cmd_path, "/");
+		cmd_path = ft_strcat(cmd_path, cmd);
+		if (access(cmd_path, R_OK) == 0)
+		{
+			free_tab(tmp);
+			return (cmd_path);
+		}
+		free (cmd_path);
+		cmd_path = NULL;
 		index ++;
 	}
+	free_tab(tmp);
+	return (cmd_path);
 }
 
-char **find_path(char *cmd, char *envp[])
+char *find_path(char *cmd, char *envp[])
 {
 	int		y;
 
@@ -44,6 +56,7 @@ char **find_path(char *cmd, char *envp[])
 
 int	init(t_pipex *pipex, char *argv[], char *envp[])
 {
+	char	*cmd;
 	int		pipe_fds[2];
 	pid_t	cmd_1;
 	pid_t	cmd_2;
@@ -51,34 +64,48 @@ int	init(t_pipex *pipex, char *argv[], char *envp[])
 	pipe(pipe_fds);
 	
 	cmd_1 = fork();
-	if (cmd_1 > 0)
-		cmd_2 = fork();
 	
 	if (cmd_1 == 0)
 	{
+		cmd = find_path(argv[2], envp);
+		if (!cmd)
+		{
+			ft_putstr_fd(argv[2], 2);
+			ft_putstr_fd(": command not found\n", 2);
+			exit (1);
+		}
 		close(pipe_fds[0]);
 		int input = open("input_file", O_RDONLY);
 		dup2(input, STDIN_FILENO);
 		dup2(pipe_fds[1], STDOUT_FILENO);
-		execve("/usr/bin/cat", (char *[]){"usr/bin/cat", NULL}, envp);
+		int check = execve("/usr/bin/cat", (char *[]){NULL}, envp);
+		close(pipe_fds[1]);
+		exit (0); 
 	}
+	cmd_2 = fork();
 	if (cmd_2 == 0)
-	{	
+	{
+		cmd = find_path(argv[3], envp);
+		if (!cmd)
+		{
+			ft_putstr_fd(argv[3], 2);
+			ft_putstr_fd(": command not found\n", 2);
+			exit (1);
+		}
 		close(pipe_fds[1]);
 		int output = open("output_file", O_RDWR);
 		dup2(pipe_fds[0], STDIN_FILENO);
 		dup2(output, STDOUT_FILENO);
-		int check = execve("/usr/bin/cat", (char *[]){"usr/bin/cat", NULL}, envp);
-		printf("%d", check);
-	}
-	if (cmd_1 > 0 && cmd_2 > 0)
-	{
+		int check = execve("/usr/bin/cat", (char *[]){"-f", NULL}, envp);
+		if (check < 0)
+			perror("cmd2");
 		close(pipe_fds[0]);
-		close(pipe_fds[1]);
-		waitpid(cmd_1, NULL, 0);
-		waitpid(cmd_2, NULL, 0);
+		exit (0);
 	}
-	
+	close(pipe_fds[0]);
+	close(pipe_fds[1]);
+	waitpid(cmd_1, NULL, 0);
+	waitpid(cmd_2, NULL, 0);
 	return (0);
 }
 
