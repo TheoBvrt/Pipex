@@ -6,7 +6,7 @@
 /*   By: thbouver <thbouver@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 17:46:18 by thbouver          #+#    #+#             */
-/*   Updated: 2025/11/14 16:56:25 by thbouver         ###   ########.fr       */
+/*   Updated: 2025/11/14 17:09:46 by thbouver         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,7 +98,7 @@ int	init(t_pipex *pipex, char *argv[], char *envp[])
 		dup2(output, STDOUT_FILENO);
 		int check = execve("/usr/bin/cat", (char *[]){"-f", NULL}, envp);
 		if (check < 0)
-			perror("cmd2");
+			perror("1");
 		close(pipe_fds[0]);
 		exit (0);
 	}
