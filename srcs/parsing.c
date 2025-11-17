@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parsing.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: thbouver <thbouver@student.42lausanne.c    +#+  +:+       +#+        */
+/*   By: theo <theo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/17 16:23:51 by thbouver          #+#    #+#             */
-/*   Updated: 2025/11/17 16:59:56 by thbouver         ###   ########.fr       */
+/*   Updated: 2025/11/17 21:40:12 by theo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ static int	parse_command(t_command *cmd, char *str)
 {
 	char	**token;
 	int		index;
-	
+
 	index = 0;
 	token = ft_split(str, ' ');
 	if (!token)
@@ -45,6 +45,7 @@ int	parser(t_pipex *pipex, char **argv, char **envp, int argc)
 	pipex->file_in = argv[1];
 	pipex->file_out = argv[argc - 1];
 	pipex->total_cmds = (argc - 3);
+	pipex->envp = envp;
 	while (index < pipex->total_cmds)
 	{
 		if (!parse_command(&pipex->cmds[index], argv[index + 2]))

@@ -15,7 +15,6 @@
 int	ft_strncmp(const char *first, const char *second, size_t lenght)
 {
 	size_t	index;
-
 	index = 0;
 	if (lenght == 0)
 		return (0);

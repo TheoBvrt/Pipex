@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: thbouver <thbouver@student.42lausanne.c    +#+  +:+       +#+        */
+/*   By: theo <theo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 17:46:18 by thbouver          #+#    #+#             */
-/*   Updated: 2025/11/17 18:24:43 by thbouver         ###   ########.fr       */
+/*   Updated: 2025/11/18 00:22:37 by theo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,9 +62,9 @@ char *find_path(char *cmd, char *envp[])
 // 	pid_t	cmd_2;
 
 // 	pipe(pipe_fds);
-	
+
 // 	cmd_1 = fork();
-	
+
 // 	if (cmd_1 == 0)
 // 	{
 // 		cmd = find_path(argv[2], envp);
@@ -80,7 +80,7 @@ char *find_path(char *cmd, char *envp[])
 // 		dup2(pipe_fds[1], STDOUT_FILENO);
 // 		int check = execve("/usr/bin/cat", (char *[]){NULL}, envp);
 // 		close(pipe_fds[1]);
-// 		exit (0); 
+// 		exit (0);
 // 	}
 // 	cmd_2 = fork();
 // 	if (cmd_2 == 0)
@@ -139,6 +139,7 @@ int	exec(t_pipex *pipex)
 	int	pid1;
 	int	pid2;
 	int	pid3;
+	int	pid4;
 	int	current;
 	int	pipe_a[2];
 	int	pipe_b[2];
@@ -154,6 +155,7 @@ int	exec(t_pipex *pipex)
 			int	infile = open(pipex->file_in, O_RDONLY);
 			dup2(infile, STDIN_FILENO);
 			dup2(pipe_a[1], STDOUT_FILENO);
+			close(infile);
 			close(pipe_a[0]);
 			close(pipe_a[1]);
 			execve(cmd, (char *[]){NULL}, pipex->envp);
@@ -181,25 +183,41 @@ int	exec(t_pipex *pipex)
 	current ++;
 	if (current == 2)
 	{
+		pipe(pipe_a);
 		pid3 = fork();
 		if (pid3 == 0)
 		{
 			cmd = find_path(pipex->cmds[current].cmd, pipex->envp);
-			int	outfile = open(pipex->file_out, O_RDWR);
 			dup2(pipe_b[0], STDIN_FILENO);
-			dup2(STDOUT_FILENO, outfile);
-			close(pipe_b[0]);
-			close(pipe_b[1]);
-			execve(cmd, (char *[]){NULL}, pipex->envp);
-		}	
-		close(pipe_b[0]);
-		close(pipe_b[1]);
-	}
+			dup2(pipe_a[1], STDOUT_FILENO);
 			close(pipe_a[1]);
 			close(pipe_a[0]);
 			close(pipe_b[1]);
 			close(pipe_b[0]);
-	waitpid(pid3, NULL, 0);
+			execve(cmd, (char *[]){NULL}, pipex->envp);
+		}
+		close (pipe_b[0]);
+		close (pipe_b[1]);
+	}
+	current ++;
+	if (current == 3)
+	{
+		pid4 = fork();
+		if (pid4 == 0)
+		{
+			cmd = find_path(pipex->cmds[current].cmd, pipex->envp);
+			int	outfile = open(pipex->file_out, O_RDWR);
+			dup2(pipe_a[0], STDIN_FILENO);
+			dup2(outfile, STDOUT_FILENO);
+			close(outfile);
+			close(pipe_a[0]);
+			close(pipe_a[1]);
+			execve(cmd, (char *[]){NULL}, pipex->envp);
+		}
+		close(pipe_a[0]);
+		close(pipe_a[1]);
+	}
+	waitpid(pid4, NULL, 0);
 }
 
 int	main(int argc, char *argv[], char *envp[])
