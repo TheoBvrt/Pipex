@@ -6,7 +6,7 @@
 /*   By: thbouver <thbouver@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 17:50:13 by thbouver          #+#    #+#             */
-/*   Updated: 2025/11/14 17:20:10 by thbouver         ###   ########.fr       */
+/*   Updated: 2025/11/17 17:02:34 by thbouver         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,14 +28,18 @@ typedef	struct s_command
 
 typedef struct s_pipex
 {
-	t_command	cmd_1;
-	t_command	cmd_2;
+	t_command	*cmds;
 	char		**envp;
-	int			fd_file_in;
-	int			fd_file_out;
+	char		*file_in;
+	char		*file_out;
+	int			total_cmds;
 }	t_pipex;
+
+
+int	parser(t_pipex *pipex, char **argv, char **envp, int argc);
 
 char	*ft_strcat(char *dest, char *src);
 void	free_tab(char **tab);
+int		count_tab(char **tab);
 
 #endif

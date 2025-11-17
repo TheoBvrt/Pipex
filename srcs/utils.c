@@ -6,7 +6,7 @@
 /*   By: thbouver <thbouver@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/14 13:01:27 by thbouver          #+#    #+#             */
-/*   Updated: 2025/11/14 13:35:40 by thbouver         ###   ########.fr       */
+/*   Updated: 2025/11/17 14:50:57 by thbouver         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,16 @@ char	*ft_strcat(char *dest, char *src)
 	dest = ft_strjoin(tmp, src);
 	free (tmp);
 	return (dest);
+}
+
+int	count_tab(char **tab)
+{
+	int	index;
+
+	index = 0;
+	while (tab[index])
+		index ++;
+	return (index);
 }
 
 void	free_tab(char **tab)

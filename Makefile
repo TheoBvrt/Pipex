@@ -1,6 +1,7 @@
 NAME = pipex
 SRCS =	./srcs/main.c \
-		./srcs/utils.c
+		./srcs/utils.c \
+		./srcs/parsing.c
 
 OBJS = ${SRCS:.c=.o}
 CC = gcc
