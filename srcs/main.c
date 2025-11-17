@@ -6,7 +6,7 @@
 /*   By: thbouver <thbouver@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 17:46:18 by thbouver          #+#    #+#             */
-/*   Updated: 2025/11/17 17:42:01 by thbouver         ###   ########.fr       */
+/*   Updated: 2025/11/17 18:24:43 by thbouver         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,28 +135,71 @@ void	debug(t_pipex pipex)
 
 int	exec(t_pipex *pipex)
 {
+	char	*cmd;
+	int	pid1;
+	int	pid2;
+	int	pid3;
 	int	current;
 	int	pipe_a[2];
 	int	pipe_b[2];
 
 	current = 0;
-	while (current < 3)
+	if (current == 0)
 	{
-		if (current == 0)
+		pipe(pipe_a);
+		pid1 = fork();
+		if (pid1 == 0)
 		{
-			pipe(pipe_a);
-			
+			cmd = find_path(pipex->cmds[current].cmd, pipex->envp);
+			int	infile = open(pipex->file_in, O_RDONLY);
+			dup2(infile, STDIN_FILENO);
+			dup2(pipe_a[1], STDOUT_FILENO);
+			close(pipe_a[0]);
+			close(pipe_a[1]);
+			execve(cmd, (char *[]){NULL}, pipex->envp);
 		}
-		else if (current % 2 == 0)
-		{
-			
-		}
-		else
-		{
-			
-		}
-		current ++;
 	}
+	current ++;
+	if (current == 1)
+	{
+		pipe(pipe_b);
+		pid2 = fork();
+		if (pid2 == 0)
+		{
+			cmd = find_path(pipex->cmds[current].cmd, pipex->envp);
+			dup2(pipe_a[0], STDIN_FILENO);
+			dup2(pipe_b[1], STDOUT_FILENO);
+			close(pipe_a[1]);
+			close(pipe_a[0]);
+			close(pipe_b[1]);
+			close(pipe_b[0]);
+			execve(cmd, (char *[]){NULL}, pipex->envp);
+		}
+		close (pipe_a[0]);
+		close (pipe_a[1]);
+	}
+	current ++;
+	if (current == 2)
+	{
+		pid3 = fork();
+		if (pid3 == 0)
+		{
+			cmd = find_path(pipex->cmds[current].cmd, pipex->envp);
+			int	outfile = open(pipex->file_out, O_RDWR);
+			dup2(pipe_b[0], STDIN_FILENO);
+			dup2(STDOUT_FILENO, outfile);
+			close(pipe_b[0]);
+			close(pipe_b[1]);
+			execve(cmd, (char *[]){NULL}, pipex->envp);
+		}	
+		close(pipe_b[0]);
+		close(pipe_b[1]);
+	}
+			close(pipe_a[1]);
+			close(pipe_a[0]);
+			close(pipe_b[1]);
+			close(pipe_b[0]);
+	waitpid(pid3, NULL, 0);
 }
 
 int	main(int argc, char *argv[], char *envp[])
