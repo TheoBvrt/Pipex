@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: thbouver <thbouver@student.42lausanne.c    +#+  +:+       +#+        */
+/*   By: theo <theo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 17:46:18 by thbouver          #+#    #+#             */
-/*   Updated: 2025/11/18 16:37:11 by thbouver         ###   ########.fr       */
+/*   Updated: 2025/11/18 23:22:53 by theo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -215,7 +215,7 @@ void	debug(t_pipex pipex)
 // 			close(pipe_a[1]);
 // 			execve(cmd, (char *[]){NULL}, pipex->envp);
 // 		}
-// 		close(pipe_a[0]); 
+// 		close(pipe_a[0]);
 // 	}
 // 	waitpid(pid4, NULL, 0);
 // }
@@ -231,10 +231,11 @@ int	exec(t_pipex *pipex)
 
 	index = 0;
 	while (index < pipex->total_cmds)
-	{		
+	{
 		if (index % 2 == 0)
 		{
-			pipe(pipe_a);
+			if (index != (pipex->total_cmds - 1))
+				pipe(pipe_a);
 			current_pid1 = fork();
 			if (current_pid1 == 0)
 			{
@@ -244,21 +245,32 @@ int	exec(t_pipex *pipex)
 					int	infile = open(pipex->file_in, O_RDONLY);
 					dup2(infile, STDIN_FILENO);
 					close(infile);
-				} 
+				}
 				else
 				{
 					dup2(pipe_b[0], STDIN_FILENO);
 					close(pipe_b[1]);
 					close(pipe_b[0]);
 				}
-				dup2(pipe_a[1], STDOUT_FILENO);
-				close (pipe_a[1]);
-				close (pipe_a[0]);
+				if (index == (pipex->total_cmds - 1))
+				{
+					int	outfile = open(pipex->file_out, O_RDWR);
+					dup2(outfile, STDOUT_FILENO);
+					close(outfile);
+				}
+				else
+				{
+					dup2(pipe_a[1], STDOUT_FILENO);
+					close (pipe_a[1]);
+					close (pipe_a[0]);
+				}
 				execve(current_cmd, (char *[]){NULL}, pipex->envp);
 			}
-			close(pipe_a[1]);
-			if (index > 0)
+			if (index > 0 && index != (pipex->total_cmds - 1))
+			{
 				close(pipe_b[0]);
+				close(pipe_b[1]);
+			}
 		}
 		else
 		{
@@ -286,12 +298,12 @@ int	exec(t_pipex *pipex)
 				execve(current_cmd, (char *[]){NULL}, pipex->envp);
 			}
 			close(pipe_a[0]);
-			if (index != (pipex->total_cmds - 1))
-				close(pipe_b[1]);
+			close(pipe_a[1]);
 		}
 		index ++;
 	}
 	close(pipe_b[0]);
+	close(pipe_b[1]);
 	waitpid(current_pid2, NULL, 0);
 }
 
