@@ -6,7 +6,7 @@
 /*   By: thbouver <thbouver@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 17:46:18 by thbouver          #+#    #+#             */
-/*   Updated: 2025/11/18 15:47:26 by thbouver         ###   ########.fr       */
+/*   Updated: 2025/11/18 16:37:11 by thbouver         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -246,18 +246,19 @@ int	exec(t_pipex *pipex)
 					close(infile);
 				} 
 				else
+				{
 					dup2(pipe_b[0], STDIN_FILENO);
+					close(pipe_b[1]);
+					close(pipe_b[0]);
+				}
 				dup2(pipe_a[1], STDOUT_FILENO);
 				close (pipe_a[1]);
 				close (pipe_a[0]);
-				execve("/usr/bin/cat", (char *[]){NULL}, pipex->envp);
+				execve(current_cmd, (char *[]){NULL}, pipex->envp);
 			}
 			close(pipe_a[1]);
 			if (index > 0)
-			{
-				close(pipe_b[1]);
 				close(pipe_b[0]);
-			}
 		}
 		else
 		{
@@ -274,24 +275,23 @@ int	exec(t_pipex *pipex)
 					close (outfile);
 				}
 				else
-					dup2(pipe_b[1], STDOUT_FILENO);
-				dup2(pipe_a[0], STDIN_FILENO);
-				close (pipe_a[1]);
-				close (pipe_a[0]);
-				if (index != (pipex->total_cmds - 1))
 				{
+					dup2(pipe_b[1], STDOUT_FILENO);
 					close (pipe_b[1]);
 					close (pipe_b[0]);
 				}
-				execve("/usr/bin/cat", (char *[]){NULL}, pipex->envp);
+				dup2(pipe_a[0], STDIN_FILENO);
+				close (pipe_a[1]);
+				close (pipe_a[0]);
+				execve(current_cmd, (char *[]){NULL}, pipex->envp);
 			}
-			close(pipe_b[1]);
 			close(pipe_a[0]);
 			if (index != (pipex->total_cmds - 1))
 				close(pipe_b[1]);
 		}
 		index ++;
 	}
+	close(pipe_b[0]);
 	waitpid(current_pid2, NULL, 0);
 }
 
