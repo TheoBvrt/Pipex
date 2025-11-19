@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: theo <theo@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: thbouver <thbouver@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 17:46:18 by thbouver          #+#    #+#             */
-/*   Updated: 2025/11/18 23:22:53 by theo             ###   ########.fr       */
+/*   Updated: 2025/11/19 12:02:21 by thbouver         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -266,7 +266,7 @@ int	exec(t_pipex *pipex)
 				}
 				execve(current_cmd, (char *[]){NULL}, pipex->envp);
 			}
-			if (index > 0 && index != (pipex->total_cmds - 1))
+			if (index > 0)
 			{
 				close(pipe_b[0]);
 				close(pipe_b[1]);
@@ -299,6 +299,7 @@ int	exec(t_pipex *pipex)
 			}
 			close(pipe_a[0]);
 			close(pipe_a[1]);
+	
 		}
 		index ++;
 	}
