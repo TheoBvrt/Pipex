@@ -6,7 +6,7 @@
 /*   By: thbouver <thbouver@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 17:46:18 by thbouver          #+#    #+#             */
-/*   Updated: 2025/11/19 12:02:21 by thbouver         ###   ########.fr       */
+/*   Updated: 2025/11/19 13:00:39 by thbouver         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -223,10 +223,7 @@ void	debug(t_pipex pipex)
 int	exec(t_pipex *pipex)
 {
 	char	*current_cmd;
-	int		current_pid1;
-	int		current_pid2;
-	int		pipe_a[2];
-	int		pipe_b[2];
+	int		current_pid;
 	int		index;
 
 	index = 0;
@@ -235,22 +232,22 @@ int	exec(t_pipex *pipex)
 		if (index % 2 == 0)
 		{
 			if (index != (pipex->total_cmds - 1))
-				pipe(pipe_a);
-			current_pid1 = fork();
-			if (current_pid1 == 0)
+				pipe(pipex->pipe_a);
+			current_pid = fork();
+			if (current_pid == 0)
 			{
 				current_cmd = find_path(pipex->cmds[index].cmd, pipex->envp);
 				if (index == 0)
 				{
-					int	infile = open(pipex->file_in, O_RDONLY);
-					dup2(infile, STDIN_FILENO);
-					close(infile);
+					pipex->in_fd = open(pipex->file_in, O_RDONLY);
+					dup2(pipex->in_fd , STDIN_FILENO);
+					close(pipex->in_fd );
 				}
 				else
 				{
-					dup2(pipe_b[0], STDIN_FILENO);
-					close(pipe_b[1]);
-					close(pipe_b[0]);
+					dup2(pipex->pipe_b[0], STDIN_FILENO);
+					close(pipex->pipe_b[1]);
+					close(pipex->pipe_b[0]);
 				}
 				if (index == (pipex->total_cmds - 1))
 				{
@@ -259,53 +256,50 @@ int	exec(t_pipex *pipex)
 					close(outfile);
 				}
 				else
-				{
-					dup2(pipe_a[1], STDOUT_FILENO);
-					close (pipe_a[1]);
-					close (pipe_a[0]);
-				}
+					dup2(pipex->pipe_a[1], STDOUT_FILENO);
+				close (pipex->pipe_a[1]);
+				close (pipex->pipe_a[0]);
 				execve(current_cmd, (char *[]){NULL}, pipex->envp);
 			}
 			if (index > 0)
 			{
-				close(pipe_b[0]);
-				close(pipe_b[1]);
+				close(pipex->pipe_b[0]);
+				close(pipex->pipe_b[1]);
 			}
 		}
 		else
 		{
 			if (index != (pipex->total_cmds - 1))
-				pipe(pipe_b);
-			current_pid2 = fork();
-			if (current_pid2 == 0)
+				pipe(pipex->pipe_b);
+			current_pid = fork();
+			if (current_pid == 0)
 			{
 				current_cmd = find_path(pipex->cmds[index].cmd, pipex->envp);
 				if (index == (pipex->total_cmds - 1))
 				{
-					int	outfile = open(pipex->file_out, O_RDWR);
-					dup2(outfile, STDOUT_FILENO);
-					close (outfile);
+					pipex->out_fd = open(pipex->file_out, O_RDWR);
+					dup2(pipex->out_fd, STDOUT_FILENO);
+					close (pipex->out_fd);
 				}
 				else
 				{
-					dup2(pipe_b[1], STDOUT_FILENO);
-					close (pipe_b[1]);
-					close (pipe_b[0]);
+					dup2(pipex->pipe_b[1], STDOUT_FILENO);
+					close (pipex->pipe_b[1]);
+					close (pipex->pipe_b[0]);
 				}
-				dup2(pipe_a[0], STDIN_FILENO);
-				close (pipe_a[1]);
-				close (pipe_a[0]);
+				dup2(pipex->pipe_a[0], STDIN_FILENO);
+				close (pipex->pipe_a[1]);
+				close (pipex->pipe_a[0]);
 				execve(current_cmd, (char *[]){NULL}, pipex->envp);
 			}
-			close(pipe_a[0]);
-			close(pipe_a[1]);
-	
+			close(pipex->pipe_a[0]);
+			close(pipex->pipe_a[1]);
 		}
 		index ++;
 	}
-	close(pipe_b[0]);
-	close(pipe_b[1]);
-	waitpid(current_pid2, NULL, 0);
+	close(pipex->pipe_b[0]);
+	close(pipex->pipe_b[1]);
+	waitpid(current_pid, NULL, 0);
 }
 
 int	main(int argc, char *argv[], char *envp[])
