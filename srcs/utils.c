@@ -6,31 +6,11 @@
 /*   By: theo <theo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/14 13:01:27 by thbouver          #+#    #+#             */
-/*   Updated: 2025/11/20 21:34:52 by theo             ###   ########.fr       */
+/*   Updated: 2025/11/21 00:21:05 by theo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
-
-char	*ft_strcat(char *dest, char *src)
-{
-	char *tmp;
-
-	if (!dest)
-	{
-		dest = ft_strdup(src);
-		if (!dest)
-			return (NULL);
-		return (dest);
-	}
-	tmp = ft_strdup(dest);
-	if (!tmp)
-		return (NULL);
-	free (dest);
-	dest = ft_strjoin(tmp, src);
-	free (tmp);
-	return (dest);
-}
 
 int	count_tab(char **tab)
 {
@@ -76,4 +56,18 @@ void	close_all(t_pipex *pipex, int **tab)
 		close(tab[index][0]);
 		index ++;
 	}
+}
+
+void	clean_exit(t_pipex *pipex)
+{
+	int	index;
+
+	index = 0;
+	free_int_tab(pipex->pipe_tab, pipex->total_cmds - 1);
+	while (index < pipex->total_cmds)
+	{
+		free_tab(pipex->cmds[index].args);
+		index ++;
+	}
+	free(pipex->cmds);
 }

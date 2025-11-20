@@ -6,7 +6,7 @@
 /*   By: theo <theo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 17:50:13 by thbouver          #+#    #+#             */
-/*   Updated: 2025/11/20 23:23:34 by theo             ###   ########.fr       */
+/*   Updated: 2025/11/21 00:22:12 by theo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,11 +44,13 @@ typedef struct s_pipex
 
 
 int	parser(t_pipex *pipex, char **argv, char **envp, int argc);
-
+char *find_path(char *cmd, char *envp[], int *status);
+char	*get_path(char *cmd, char *path);
 void	free_int_tab(int **tab, int size);
 char	*ft_strcat(char *dest, char *src);
 void	free_tab(char **tab);
 int		count_tab(char **tab);
 void	close_all(t_pipex *pipex, int **tab);
+void	clean_exit(t_pipex *pipex);
 
 #endif

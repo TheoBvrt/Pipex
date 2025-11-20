@@ -6,7 +6,7 @@
 /*   By: theo <theo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/17 16:23:51 by thbouver          #+#    #+#             */
-/*   Updated: 2025/11/20 23:35:01 by theo             ###   ########.fr       */
+/*   Updated: 2025/11/21 00:21:54 by theo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,4 +52,81 @@ int	parser(t_pipex *pipex, char **argv, char **envp, int argc)
 		index ++;
 	}
 	return (1);
+}
+
+char	*get_path(char *cmd, char *path)
+{
+	char	**tmp;
+	char	*cmd_path;
+	int		index;
+
+	index = 0;
+	cmd_path = NULL;
+	tmp = ft_split(path + 5, ':');
+	if (!tmp)
+		return (NULL);
+	while(tmp[index])
+	{
+		cmd_path = ft_strcat(cmd_path, tmp[index]);
+		cmd_path = ft_strcat(cmd_path, "/");
+		cmd_path = ft_strcat(cmd_path, cmd);
+		if (access(cmd_path, F_OK) == 0)
+		{
+			free_tab(tmp);
+			return (cmd_path);
+		}
+		free (cmd_path);
+		cmd_path = NULL;
+		index ++;
+	}
+	free_tab(tmp);
+	return (cmd_path);
+}
+
+char *find_path(char *cmd, char *envp[], int *status)
+{
+	char	*path;
+	int		y;
+
+	y = 0;
+	if (access(cmd, F_OK) == 0)
+	{
+		if (access(cmd, X_OK) == -1)
+			return (*status = -1, NULL);
+		return (cmd);
+	}
+	while (envp[y])
+	{
+		if (ft_strncmp(envp[y], "PATH=", 5) == 0)
+		{
+			path = get_path(cmd, envp[y]);
+			if (path)
+			{
+				if (access(path, X_OK) == -1)
+					return (free(path), *status = -1, NULL);
+			}
+			return (path);
+		}
+		y ++;
+	}
+}
+
+char	*ft_strcat(char *dest, char *src)
+{
+	char *tmp;
+
+	if (!dest)
+	{
+		dest = ft_strdup(src);
+		if (!dest)
+			return (NULL);
+		return (dest);
+	}
+	tmp = ft_strdup(dest);
+	if (!tmp)
+		return (NULL);
+	free (dest);
+	dest = ft_strjoin(tmp, src);
+	free (tmp);
+	return (dest);
 }
