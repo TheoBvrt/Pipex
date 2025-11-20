@@ -6,7 +6,7 @@
 /*   By: thbouver <thbouver@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 17:50:13 by thbouver          #+#    #+#             */
-/*   Updated: 2025/11/19 13:10:58 by thbouver         ###   ########.fr       */
+/*   Updated: 2025/11/20 13:53:02 by thbouver         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ typedef	struct s_command
 {
 	char	*cmd;
 	char	**args;
+	int		pid;
 }	t_command;
 
 typedef struct s_pipex

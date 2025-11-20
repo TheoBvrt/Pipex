@@ -6,7 +6,7 @@
 /*   By: thbouver <thbouver@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 17:46:18 by thbouver          #+#    #+#             */
-/*   Updated: 2025/11/19 17:28:14 by thbouver         ###   ########.fr       */
+/*   Updated: 2025/11/20 14:37:31 by thbouver         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,9 +135,9 @@ void	debug(t_pipex pipex)
 
 int	exec(t_pipex *pipex)
 {
-	int	current_pid;
 	int	index;
 	int	**pipe_tab;
+	int	status;
 
 	index = 0;
 	pipe_tab = malloc(sizeof(int *) * (pipex->total_cmds - 1));
@@ -158,10 +158,21 @@ int	exec(t_pipex *pipex)
 	index = 0;
 	while (index < pipex->total_cmds)
 	{
-		current_pid = fork();
-		if (current_pid == 0)
+		pipex->cmds[index].pid = fork();
+		if (pipex->cmds[index].pid == 0)
 		{
 			char *cmd = find_path(pipex->cmds[index].cmd, pipex->envp);
+			if (!cmd)
+			{
+				ft_putstr_fd(pipex->cmds[index].cmd, 2);
+				ft_putstr_fd(": command not found", 2);
+				for (int i = 0; i < (pipex->total_cmds - 1); i ++)
+				{
+					close (pipe_tab[i][0]);
+					close(pipe_tab[i][1]);
+				}
+				exit (127);
+			}
 			if (index == 0)
 			{
 				pipex->in_fd = open(pipex->file_in, O_RDONLY);
@@ -185,7 +196,12 @@ int	exec(t_pipex *pipex)
 				close (pipe_tab[i][0]);
 				close(pipe_tab[i][1]);
 			}
-			execve(cmd, (char *[]){NULL}, pipex->envp);
+			if (execve(cmd, (char *[]){NULL}, pipex->envp) == -1)
+			{
+				perror("bash");
+				exit(1);
+			}
+			exit (0);
 		}
 		index ++;
 	}
@@ -197,7 +213,12 @@ int	exec(t_pipex *pipex)
 		close(pipe_tab[index][1]);
 		index ++;
 	}
-	waitpid(current_pid, NULL, 0);
+	index  = 0;
+	while (index < pipex->total_cmds)
+		waitpid(pipex->cmds[index ++].pid, &status, 0);
+	if (WIFEXITED(status))
+		return (WEXITSTATUS(status));
+	return (status);
 }
 
 int	main(int argc, char *argv[], char *envp[])
@@ -211,6 +232,5 @@ int	main(int argc, char *argv[], char *envp[])
 	}
 	if (!parser(&pipex, argv, envp, argc))
 		return (1);
-	exec(&pipex);
-	return (0);
+	return (exec(&pipex));
 }
