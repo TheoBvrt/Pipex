@@ -6,7 +6,7 @@
 /*   By: thbouver <thbouver@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 17:46:18 by thbouver          #+#    #+#             */
-/*   Updated: 2025/11/20 14:37:31 by thbouver         ###   ########.fr       */
+/*   Updated: 2025/11/20 17:27:52 by thbouver         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ char	*get_path(char *cmd, char *path)
 		cmd_path = ft_strcat(cmd_path, tmp[index]);
 		cmd_path = ft_strcat(cmd_path, "/");
 		cmd_path = ft_strcat(cmd_path, cmd);
-		if (access(cmd_path, R_OK) == 0)
+		if (access(cmd_path, F_OK) == 0)
 		{
 			free_tab(tmp);
 			return (cmd_path);
@@ -41,73 +41,41 @@ char	*get_path(char *cmd, char *path)
 	return (cmd_path);
 }
 
-char *find_path(char *cmd, char *envp[])
+char *find_path(char *cmd, char *envp[], int *status)
 {
+	char	*path;
 	int		y;
 
 	y = 0;
+	if (access(cmd, F_OK) == 0)
+	{
+		if (access(cmd, X_OK) == -1)
+		{
+			*status = -1;
+			return (NULL);
+		}
+		return (cmd);
+	}
 	while (envp[y])
 	{
 		if (ft_strncmp(envp[y], "PATH=", 5) == 0)
-			return (get_path(cmd, envp[y]));
+		{
+			path = get_path(cmd, envp[y]);
+			if (path)
+			{
+				if (access(path, X_OK) == -1)
+				{
+					free (path);
+					*status = -1;
+					return (NULL);
+				}
+			}
+			*status = -2;
+			return (path);
+		}
 		y ++;
 	}
 }
-
-// int	init(t_pipex *pipex, char *argv[], char *envp[])
-// {
-// 	char	*cmd;
-// 	int		pipe_fds[2];
-// 	pid_t	cmd_1;
-// 	pid_t	cmd_2;
-
-// 	pipe(pipe_fds);
-
-// 	cmd_1 = fork();
-
-// 	if (cmd_1 == 0)
-// 	{
-// 		cmd = find_path(argv[2], envp);
-// 		if (!cmd)
-// 		{
-// 			ft_putstr_fd(argv[2], 2);
-// 			ft_putstr_fd(": command not found\n", 2);
-// 			exit (1);
-// 		}
-// 		close(pipe_fds[0]);
-// 		int input = open("input_file", O_RDONLY);
-// 		dup2(input, STDIN_FILENO);
-// 		dup2(pipe_fds[1], STDOUT_FILENO);
-// 		int check = execve("/usr/bin/cat", (char *[]){NULL}, envp);
-// 		close(pipe_fds[1]);
-// 		exit (0);
-// 	}
-// 	cmd_2 = fork();
-// 	if (cmd_2 == 0)
-// 	{
-// 		cmd = find_path(argv[3], envp);
-// 		if (!cmd)
-// 		{
-// 			ft_putstr_fd(argv[3], 2);
-// 			ft_putstr_fd(": command not found\n", 2);
-// 			exit (1);
-// 		}
-// 		close(pipe_fds[1]);
-// 		int output = open("output_file", O_RDWR);
-// 		dup2(pipe_fds[0], STDIN_FILENO);
-// 		dup2(output, STDOUT_FILENO);
-// 		int check = execve("/usr/bin/cat", (char *[]){"-f", NULL}, envp);
-// 		if (check < 0)
-// 			perror("1");
-// 		close(pipe_fds[0]);
-// 		exit (0);
-// 	}
-// 	close(pipe_fds[0]);
-// 	close(pipe_fds[1]);
-// 	waitpid(cmd_1, NULL, 0);
-// 	waitpid(cmd_2, NULL, 0);
-// 	return (0);
-// }
 
 void	debug(t_pipex pipex)
 {
@@ -133,6 +101,19 @@ void	debug(t_pipex pipex)
 	}
 }
 
+void	close_all(t_pipex *pipex, int **tab)
+{
+	int	index;
+
+	index = 0;
+	while (index < (pipex->total_cmds - 1))
+	{
+		close (tab[index][1]);
+		close(tab[index][0]);
+		index ++;
+	}
+}
+
 int	exec(t_pipex *pipex)
 {
 	int	index;
@@ -140,6 +121,7 @@ int	exec(t_pipex *pipex)
 	int	status;
 
 	index = 0;
+	status = -2;
 	pipe_tab = malloc(sizeof(int *) * (pipex->total_cmds - 1));
 	if (!pipe_tab)
 		return (0);
@@ -153,7 +135,6 @@ int	exec(t_pipex *pipex)
 	index = 0;
 	while (index < (pipex->total_cmds - 1))
 		pipe(pipe_tab[index ++]);
-	
 
 	index = 0;
 	while (index < pipex->total_cmds)
@@ -161,44 +142,53 @@ int	exec(t_pipex *pipex)
 		pipex->cmds[index].pid = fork();
 		if (pipex->cmds[index].pid == 0)
 		{
-			char *cmd = find_path(pipex->cmds[index].cmd, pipex->envp);
-			if (!cmd)
+			pipex->cmd = find_path(pipex->cmds[index].cmd, pipex->envp, &status);
+			if (!pipex->cmd)
 			{
-				ft_putstr_fd(pipex->cmds[index].cmd, 2);
-				ft_putstr_fd(": command not found", 2);
-				for (int i = 0; i < (pipex->total_cmds - 1); i ++)
+				if (status == -1)
 				{
-					close (pipe_tab[i][0]);
-					close(pipe_tab[i][1]);
+					ft_putstr_fd(pipex->cmds[index].cmd, 2);
+					ft_putstr_fd(": permission denied\n", 2);
+					close_all(pipex, pipe_tab);
+					exit(126);
 				}
+				ft_putstr_fd(pipex->cmds[index].cmd, 2);
+				ft_putstr_fd(": command not found\n", 2);
+				close_all(pipex, pipe_tab);
 				exit (127);
 			}
 			if (index == 0)
 			{
 				pipex->in_fd = open(pipex->file_in, O_RDONLY);
+				if (pipex->in_fd == -1)
+				{
+					perror("pipex");
+					close_all(pipex, pipe_tab);
+					exit (1);
+				}
 				dup2(pipex->in_fd, STDIN_FILENO);
 				close(pipex->in_fd);
 			}
 			else
 				dup2(pipe_tab[index - 1][0], STDIN_FILENO);
-			
 			if (index == (pipex->total_cmds - 1))
 			{
-				pipex->out_fd = open(pipex->file_out, O_RDWR);
+				pipex->out_fd = open(pipex->file_out, O_CREAT | O_WRONLY | O_TRUNC, 0644);
+				if (pipex->out_fd == -1)
+				{
+					perror("pipex");
+					close_all(pipex, pipe_tab);
+					exit(1);
+				}
 				dup2(pipex->out_fd, STDOUT_FILENO);
 				close(pipex->out_fd);
 			}
 			else
 				dup2(pipe_tab[index][1], STDOUT_FILENO);
-
-			for (int i = 0; i < (pipex->total_cmds - 1); i ++)
+			close_all(pipex, pipe_tab);
+			if (execve(pipex->cmd, pipex->cmds[index].args, pipex->envp) == -1)
 			{
-				close (pipe_tab[i][0]);
-				close(pipe_tab[i][1]);
-			}
-			if (execve(cmd, (char *[]){NULL}, pipex->envp) == -1)
-			{
-				perror("bash");
+				perror("pipex");
 				exit(1);
 			}
 			exit (0);
@@ -206,13 +196,7 @@ int	exec(t_pipex *pipex)
 		index ++;
 	}
 
-	index = 0;
-	while (index < (pipex->total_cmds - 1))
-	{
-		close(pipe_tab[index][0]);
-		close(pipe_tab[index][1]);
-		index ++;
-	}
+	close_all(pipex, pipe_tab);
 	index  = 0;
 	while (index < pipex->total_cmds)
 		waitpid(pipex->cmds[index ++].pid, &status, 0);
@@ -227,9 +211,10 @@ int	main(int argc, char *argv[], char *envp[])
 
 	if (argc < 5)
 	{
-		ft_putstr_fd("usage > ./pipex file1 cmd1 cm2 ... file", STDERR_FILENO);
+		ft_putstr_fd("usage > ./pipex file1 cmd1 cmd2 ... file", STDERR_FILENO);
 		return (1);
 	}
+	int	check;
 	if (!parser(&pipex, argv, envp, argc))
 		return (1);
 	return (exec(&pipex));

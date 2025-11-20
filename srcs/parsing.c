@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parsing.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: theo <theo@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: thbouver <thbouver@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/17 16:23:51 by thbouver          #+#    #+#             */
-/*   Updated: 2025/11/17 21:40:12 by theo             ###   ########.fr       */
+/*   Updated: 2025/11/20 15:31:45 by thbouver         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,9 @@ static int	parse_command(t_command *cmd, char *str)
 	if (!cmd->args)
 		return (free_tab(cmd->args), 0);
 	cmd->cmd = token[index];
-	index ++;
 	while (token[index])
 	{
-		cmd->args[index - 1] = token[index];
+		cmd->args[index] = token[index];
 		index ++;
 	}
 	return (free(token), 1);

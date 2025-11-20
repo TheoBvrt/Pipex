@@ -6,7 +6,7 @@
 /*   By: thbouver <thbouver@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 17:50:13 by thbouver          #+#    #+#             */
-/*   Updated: 2025/11/20 13:53:02 by thbouver         ###   ########.fr       */
+/*   Updated: 2025/11/20 16:37:26 by thbouver         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,12 +33,12 @@ typedef struct s_pipex
 	char		**envp;
 	char		*file_in;
 	char		*file_out;
+	char		*cmd;
 	int			total_cmds;
 	int			in_fd;
 	int			out_fd;
 	int			pipe_a[2];
 	int			pipe_b[2];
-	int			execstatus;
 }	t_pipex;
 
 
