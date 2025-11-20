@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: thbouver <thbouver@student.42lausanne.c    +#+  +:+       +#+        */
+/*   By: theo <theo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/14 13:01:27 by thbouver          #+#    #+#             */
-/*   Updated: 2025/11/17 14:50:57 by thbouver         ###   ########.fr       */
+/*   Updated: 2025/11/20 21:34:52 by theo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,4 +53,27 @@ void	free_tab(char **tab)
 		index ++;
 	}
 	free(tab);
+}
+
+void	free_int_tab(int **tab, int size)
+{
+	int	index;
+
+	index = 0;
+	while (index < size)
+		free(tab[index ++]);
+	free (tab);
+}
+
+void	close_all(t_pipex *pipex, int **tab)
+{
+	int	index;
+
+	index = 0;
+	while (index < (pipex->total_cmds - 1))
+	{
+		close (tab[index][1]);
+		close(tab[index][0]);
+		index ++;
+	}
 }

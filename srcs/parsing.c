@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parsing.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: thbouver <thbouver@student.42lausanne.c    +#+  +:+       +#+        */
+/*   By: theo <theo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/17 16:23:51 by thbouver          #+#    #+#             */
-/*   Updated: 2025/11/20 15:31:45 by thbouver         ###   ########.fr       */
+/*   Updated: 2025/11/20 23:35:01 by theo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ static int	parse_command(t_command *cmd, char *str)
 	cmd->args = ft_calloc(count_tab(token) + 1, sizeof(char *));
 	if (!cmd->args)
 		return (free_tab(cmd->args), 0);
-	cmd->cmd = token[index];
+	cmd->cmd =token[index];
 	while (token[index])
 	{
 		cmd->args[index] = token[index];
