@@ -6,12 +6,17 @@
 /*   By: theo <theo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 17:50:13 by thbouver          #+#    #+#             */
-/*   Updated: 2025/11/21 00:22:12 by theo             ###   ########.fr       */
+/*   Updated: 2025/11/21 10:51:03 by theo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PIPEX_H
 # define PIPEX_H
+
+# ifndef BOOLEAN
+#  define TRUE 1
+#  define FALSE 0
+# endif
 
 # include "../libft/libft.h"
 # include "stdio.h"
@@ -20,7 +25,7 @@
 # include <sys/types.h>
 # include <sys/wait.h>
 
-typedef	struct s_command
+typedef struct s_command
 {
 	char	*cmd;
 	char	**args;
@@ -30,7 +35,7 @@ typedef	struct s_command
 typedef struct s_pipex
 {
 	t_command	*cmds;
-	int	**pipe_tab;
+	int			**pipe_tab;
 	char		**envp;
 	char		*file_in;
 	char		*file_out;
@@ -42,15 +47,16 @@ typedef struct s_pipex
 	int			pipe_b[2];
 }	t_pipex;
 
+char	*find_path(char *cmd, char *envp[], int *status);
 
-int	parser(t_pipex *pipex, char **argv, char **envp, int argc);
-char *find_path(char *cmd, char *envp[], int *status);
-char	*get_path(char *cmd, char *path);
-void	free_int_tab(int **tab, int size);
-char	*ft_strcat(char *dest, char *src);
-void	free_tab(char **tab);
-int		count_tab(char **tab);
-void	close_all(t_pipex *pipex, int **tab);
+void	fail_init_exit(t_pipex *pipex, int close_fd, int nb_pipes, int tab_s);
+void	close_all(int **tab, int size);
 void	clean_exit(t_pipex *pipex);
+void	free_tab(char **tab);
+
+int		parser(t_pipex *pipex, char **argv, char **envp, int argc);
+int		run_pipeline(t_pipex *pipex);
+int		clean_child(t_pipex *pipex, int exit_value);
+int		count_tab(char **tab);
 
 #endif

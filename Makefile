@@ -1,12 +1,14 @@
 NAME = pipex
 SRCS =	./srcs/main.c \
 		./srcs/utils.c \
-		./srcs/parsing.c
+		./srcs/parsing.c \
+		./srcs/pipeline.c \
+		./srcs/exit.c
 
 OBJS = ${SRCS:.c=.o}
 CC = gcc
 RM = rm -f
-CFLAGS = -Iheaders -g
+CFLAGS = -Iheaders -Wall -Werror -Wextra -g
 
 all : ${NAME}
 

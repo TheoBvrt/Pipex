@@ -6,7 +6,7 @@
 /*   By: theo <theo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/14 13:01:27 by thbouver          #+#    #+#             */
-/*   Updated: 2025/11/21 00:21:05 by theo             ###   ########.fr       */
+/*   Updated: 2025/11/21 10:33:46 by theo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,22 +35,12 @@ void	free_tab(char **tab)
 	free(tab);
 }
 
-void	free_int_tab(int **tab, int size)
+void	close_all(int **tab, int size)
 {
 	int	index;
 
 	index = 0;
 	while (index < size)
-		free(tab[index ++]);
-	free (tab);
-}
-
-void	close_all(t_pipex *pipex, int **tab)
-{
-	int	index;
-
-	index = 0;
-	while (index < (pipex->total_cmds - 1))
 	{
 		close (tab[index][1]);
 		close(tab[index][0]);
@@ -58,16 +48,10 @@ void	close_all(t_pipex *pipex, int **tab)
 	}
 }
 
-void	clean_exit(t_pipex *pipex)
+int	clean_child(t_pipex *pipex, int exit_value)
 {
-	int	index;
-
-	index = 0;
-	free_int_tab(pipex->pipe_tab, pipex->total_cmds - 1);
-	while (index < pipex->total_cmds)
-	{
-		free_tab(pipex->cmds[index].args);
-		index ++;
-	}
-	free(pipex->cmds);
+	close_all(pipex->pipe_tab, pipex->total_cmds - 1);
+	free(pipex->cmd);
+	clean_exit(pipex);
+	return (exit_value);
 }

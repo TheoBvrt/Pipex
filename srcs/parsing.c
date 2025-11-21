@@ -6,55 +6,33 @@
 /*   By: theo <theo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/17 16:23:51 by thbouver          #+#    #+#             */
-/*   Updated: 2025/11/21 00:21:54 by theo             ###   ########.fr       */
+/*   Updated: 2025/11/21 10:00:36 by theo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-static int	parse_command(t_command *cmd, char *str)
+static char	*ft_strcat(char *dest, char *src)
 {
-	char	**token;
-	int		index;
+	char	*tmp;
 
-	index = 0;
-	token = ft_split(str, ' ');
-	if (!token)
-		return (0);
-	cmd->args = ft_calloc(count_tab(token) + 1, sizeof(char *));
-	if (!cmd->args)
-		return (free_tab(cmd->args), 0);
-	cmd->cmd =token[index];
-	while (token[index])
+	if (!dest)
 	{
-		cmd->args[index] = token[index];
-		index ++;
+		dest = ft_strdup(src);
+		if (!dest)
+			return (NULL);
+		return (dest);
 	}
-	return (free(token), 1);
+	tmp = ft_strdup(dest);
+	if (!tmp)
+		return (NULL);
+	free (dest);
+	dest = ft_strjoin(tmp, src);
+	free (tmp);
+	return (dest);
 }
 
-int	parser(t_pipex *pipex, char **argv, char **envp, int argc)
-{
-	int	index;
-
-	index = 0;
-	pipex->cmds = malloc(sizeof(t_command) * (argc - 3));
-	if (!pipex->cmds)
-		return (1);
-	pipex->file_in = argv[1];
-	pipex->file_out = argv[argc - 1];
-	pipex->total_cmds = (argc - 3);
-	pipex->envp = envp;
-	while (index < pipex->total_cmds)
-	{
-		if (!parse_command(&pipex->cmds[index], argv[index + 2]))
-			return (free(pipex->cmds), 0);
-		index ++;
-	}
-	return (1);
-}
-
-char	*get_path(char *cmd, char *path)
+static char	*get_path(char *cmd, char *path)
 {
 	char	**tmp;
 	char	*cmd_path;
@@ -65,7 +43,7 @@ char	*get_path(char *cmd, char *path)
 	tmp = ft_split(path + 5, ':');
 	if (!tmp)
 		return (NULL);
-	while(tmp[index])
+	while (tmp[index])
 	{
 		cmd_path = ft_strcat(cmd_path, tmp[index]);
 		cmd_path = ft_strcat(cmd_path, "/");
@@ -83,7 +61,28 @@ char	*get_path(char *cmd, char *path)
 	return (cmd_path);
 }
 
-char *find_path(char *cmd, char *envp[], int *status)
+static int	parse_command(t_command *cmd, char *str)
+{
+	char	**token;
+	int		index;
+
+	index = 0;
+	token = ft_split(str, ' ');
+	if (!token)
+		return (0);
+	cmd->args = ft_calloc(count_tab(token) + 1, sizeof(char *));
+	if (!cmd->args)
+		return (free_tab(cmd->args), 0);
+	cmd->cmd = token[index];
+	while (token[index])
+	{
+		cmd->args[index] = token[index];
+		index ++;
+	}
+	return (free(token), 1);
+}
+
+char	*find_path(char *cmd, char *envp[], int *status)
 {
 	char	*path;
 	int		y;
@@ -109,24 +108,26 @@ char *find_path(char *cmd, char *envp[], int *status)
 		}
 		y ++;
 	}
+	return (NULL);
 }
 
-char	*ft_strcat(char *dest, char *src)
+int	parser(t_pipex *pipex, char **argv, char **envp, int argc)
 {
-	char *tmp;
+	int	index;
 
-	if (!dest)
+	index = 0;
+	pipex->cmds = malloc(sizeof(t_command) * (argc - 3));
+	if (!pipex->cmds)
+		return (1);
+	pipex->file_in = argv[1];
+	pipex->file_out = argv[argc - 1];
+	pipex->total_cmds = (argc - 3);
+	pipex->envp = envp;
+	while (index < pipex->total_cmds)
 	{
-		dest = ft_strdup(src);
-		if (!dest)
-			return (NULL);
-		return (dest);
+		if (!parse_command(&pipex->cmds[index], argv[index + 2]))
+			return (free(pipex->cmds), 0);
+		index ++;
 	}
-	tmp = ft_strdup(dest);
-	if (!tmp)
-		return (NULL);
-	free (dest);
-	dest = ft_strjoin(tmp, src);
-	free (tmp);
-	return (dest);
+	return (1);
 }
