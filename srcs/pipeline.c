@@ -6,7 +6,7 @@
 /*   By: thbouver <thbouver@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/21 09:17:34 by theo              #+#    #+#             */
-/*   Updated: 2025/11/21 14:58:19 by thbouver         ###   ########.fr       */
+/*   Updated: 2025/11/21 15:49:11 by thbouver         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,9 @@ static void	run_child_process(t_pipex *pipex, int index)
 		if (errno != 13)
 			free(pipex->cmd);
 		clean_exit(pipex);
-		exit(1);
+		if (errno == 13 || errno == 21)
+			exit(126);
+		exit (1);
 	}
 }
 

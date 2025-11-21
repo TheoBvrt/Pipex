@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parsing.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: theo <theo@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: thbouver <thbouver@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/17 16:23:51 by thbouver          #+#    #+#             */
-/*   Updated: 2025/11/21 10:00:36 by theo             ###   ########.fr       */
+/*   Updated: 2025/11/21 16:04:45 by thbouver         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,6 +90,8 @@ char	*find_path(char *cmd, char *envp[], int *status)
 	y = 0;
 	if (access(cmd, F_OK) == 0)
 	{
+		if (is_dir(cmd) == 1 && cmd[0] != '.' && cmd[1] != '/')
+			return (*status = 0, NULL);
 		if (access(cmd, X_OK) == -1)
 			return (*status = -1, NULL);
 		return (cmd);
@@ -100,10 +102,8 @@ char	*find_path(char *cmd, char *envp[], int *status)
 		{
 			path = get_path(cmd, envp[y]);
 			if (path)
-			{
 				if (access(path, X_OK) == -1)
 					return (free(path), *status = -1, NULL);
-			}
 			return (path);
 		}
 		y ++;

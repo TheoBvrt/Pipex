@@ -6,7 +6,7 @@
 /*   By: thbouver <thbouver@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/14 13:01:27 by thbouver          #+#    #+#             */
-/*   Updated: 2025/11/21 13:42:56 by thbouver         ###   ########.fr       */
+/*   Updated: 2025/11/21 15:49:45 by thbouver         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,4 +54,17 @@ int	clean_child(t_pipex *pipex, int exit_value)
 	free(pipex->cmd);
 	clean_exit(pipex);
 	return (exit_value);
+}
+
+int	is_dir(char *path)
+{
+	char	buff[1];
+	int		fd;
+
+	fd = open(path, O_RDONLY);
+	if (!fd)
+		return (0);
+	if (read(fd, buff, 1) == -1 && errno == EISDIR)
+		return (close(fd), 1);
+	return (close(fd), 0);
 }

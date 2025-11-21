@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipex.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: theo <theo@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: thbouver <thbouver@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 17:50:13 by thbouver          #+#    #+#             */
-/*   Updated: 2025/11/21 10:51:03 by theo             ###   ########.fr       */
+/*   Updated: 2025/11/21 15:49:54 by thbouver         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,5 +58,6 @@ int		parser(t_pipex *pipex, char **argv, char **envp, int argc);
 int		run_pipeline(t_pipex *pipex);
 int		clean_child(t_pipex *pipex, int exit_value);
 int		count_tab(char **tab);
+int		is_dir(char *path);
 
 #endif
