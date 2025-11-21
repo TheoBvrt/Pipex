@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipeline.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: theo <theo@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: thbouver <thbouver@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/21 09:17:34 by theo              #+#    #+#             */
-/*   Updated: 2025/11/21 10:12:43 by theo             ###   ########.fr       */
+/*   Updated: 2025/11/21 14:58:19 by thbouver         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,8 @@ static void	run_child_process(t_pipex *pipex, int index)
 	if (execve(pipex->cmd, pipex->cmds[index].args, pipex->envp) == -1)
 	{
 		perror("pipex");
-		free(pipex->cmd);
+		if (errno != 13)
+			free(pipex->cmd);
 		clean_exit(pipex);
 		exit(1);
 	}

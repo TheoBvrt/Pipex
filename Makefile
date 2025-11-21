@@ -1,4 +1,5 @@
 NAME = pipex
+
 SRCS =	./srcs/main.c \
 		./srcs/utils.c \
 		./srcs/parsing.c \
